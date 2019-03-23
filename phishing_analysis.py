@@ -11,6 +11,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
+from sklearn.decomposition import FastICA
 
 random.seed(100)
 np.random.seed(100)
@@ -142,6 +143,22 @@ def run_pca_and_plot(X, name):
     plt.show()
 
 
+def run_ica_and_plot(X, name, number_of_componenets):
+    # plot recunstruction error
+    reconstruction_error = []
+    for n_components in np.arange(1, number_of_componenets + 1):
+        ica = FastICA(n_components=n_components)
+        reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(ica.fit_transform(X)))) / X.size)
+    plt.figure()
+    plt.plot(np.arange(1, number_of_componenets + 1), reconstruction_error)
+    plt.xticks(np.arange(1, number_of_componenets + 1))
+    plt.xlabel('Components')
+    plt.ylabel('Reconstruction Error')
+    plt.title('{} : ICA Reconstruction Error'.format(name))
+    plt.grid()
+    plt.show()
+
+
 phishing_path = ""
 if len(sys.argv) > 1:
     phishing_path = sys.argv[1]
@@ -172,7 +189,9 @@ plot_name = "Phishing Detection"
 
 # plot_score_em(range(2, 20), x_train, plot_name)
 
-run_pca_and_plot(x_train, plot_name)
+# run_pca_and_plot(x_train, plot_name)
+
+run_ica_and_plot(x_train,plot_name,len(features))
 
 # plot_silhoutte_score_kmeans(range(2, 10), x_train, plot_name)
 # clfr = KMeans(n_clusters=best_k_for_kmeans)
