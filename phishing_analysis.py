@@ -1,9 +1,12 @@
 import random
 import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.spatial.distance import cdist
 from sklearn import mixture
+from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.model_selection import train_test_split
 
@@ -16,11 +19,6 @@ best_k_for_em = 3
 
 
 def plot_elbow_method_graph_kmeans(K, X, name):
-    from sklearn.cluster import KMeans
-    from scipy.spatial.distance import cdist
-    import numpy as np
-    import matplotlib.pyplot as plt
-
     plt.plot()
     # k means determine k
     distortions = []
@@ -38,8 +36,6 @@ def plot_elbow_method_graph_kmeans(K, X, name):
 
 
 def plot_silhoutte_score_em(K, X, name):
-    import matplotlib.pyplot as plt
-
     plt.plot()
     # k means determine k
     silhouette_scores = []
@@ -54,6 +50,33 @@ def plot_silhoutte_score_em(K, X, name):
     plt.ylabel('Silhouette Scores')
     plt.title('{} : Silhouette Method showing the optimal k'.format(name))
     plt.show()
+
+
+def describe_what_you_see(cluster_labels,
+                          classification_labels, name,
+                          X, features):
+    # print(classification_labels)
+    unique_cluster_labels = np.unique(cluster_labels)
+    print(unique_cluster_labels)
+    for cluster in unique_cluster_labels:
+        plt.plot()
+        classification_labels_in_this_cluster = classification_labels[cluster_labels == cluster]
+        print("what i wannt")
+        print(np.shape(classification_labels_in_this_cluster))
+
+        # print(classification_labels_in_this_cluster)
+        unique, counts = np.unique(classification_labels_in_this_cluster, return_counts=True)
+        print(np.shape(unique))
+        print(np.shape(counts))
+        print(len(unique))
+        y_pos = np.arange(len(unique))
+        y_labels = ['0', '1']
+        plt.bar(y_pos, counts, align='center', alpha=0.5)
+        plt.xticks(y_pos, y_labels)
+        print(y_labels)
+        plt.ylabel('Counts')
+        plt.title('{} : Simple clustering results ,Cluster {} '.format(name, cluster))
+        plt.show()
 
 
 phishing_path = ""
@@ -79,25 +102,26 @@ target = 'Result'
 
 data = pd.read_csv(phishing_path, names=names, header=None)
 
-train, test = train_test_split(data, test_size=0.2)
+x_train = data[features]
+y_train = data[target]
 
-x_train = train[features]
-y_train = train[target]
-
-x_test = test[features]
-y_test = test[target]
 plot_name = "Phishing Detection"
 
 # plot_elbow_method_graph_kmeans(range(2, 10), x_train)
 
-plot_silhoutte_score_em(range(2, 10), x_train)
+plot_silhoutte_score_em(range(2, 10), x_train,plot_name)
 
 # kmeanModel = KMeans(n_clusters=4).fit(x_train)
-clfr = mixture.GaussianMixture(n_components=4, covariance_type='full')
+clfr = mixture.GaussianMixture(n_components=best_k_for_em, covariance_type='full')
 clfr.fit(x_train)
 # kmeanModel.fit(x_train)
 
-print(clfr.predict(x_train))
+print(np.shape(y_train))
+print(np.shape(clfr.predict(x_train)))
+
+
+describe_what_you_see(clfr.predict(x_train), y_train, 'EM algorithm', x_train, features)
+
 # print(y_train)
 # print(kmeans.labels_ - y_train)
 
