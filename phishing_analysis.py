@@ -9,6 +9,8 @@ from sklearn import mixture
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+from sklearn.decomposition import PCA
 
 random.seed(100)
 np.random.seed(100)
@@ -35,20 +37,29 @@ def plot_elbow_method_graph_kmeans(K, X, name):
     plt.show()
 
 
-def plot_silhoutte_score_em(K, X, name):
-    plt.plot()
+def plot_score_em(K, X, name):
     # k means determine k
     silhouette_scores = []
+    bic_scores = []
     for k in K:
         clfr = mixture.GaussianMixture(n_components=k, covariance_type='full')
         clfr.fit(X)
+        bic_scores.append(clfr.bic(X))
         silhouette_scores.append(silhouette_score(X, clfr.predict(X)))
 
     # Plot the elbow
+    plt.plot()
     plt.plot(K, silhouette_scores, 'bx-')
     plt.xlabel('k')
     plt.ylabel('Silhouette Scores')
     plt.title('{} EM : Silhouette Method showing the optimal k'.format(name))
+    plt.show()
+    # Plot  bic
+    plt.plot()
+    plt.plot(K, bic_scores, 'bx-')
+    plt.xlabel('k')
+    plt.ylabel('BIC values')
+    plt.title('{} EM : BIC Method showing the optimal k'.format(name))
     plt.show()
 
 
@@ -87,7 +98,7 @@ def describe_what_you_see(cluster_labels,
         print(np.shape(counts))
         print(len(unique))
         y_pos = np.arange(len(unique))
-        y_labels=unique.tolist()
+        y_labels = unique.tolist()
         # y_labels = ['0', '1']
         plt.bar(y_pos, counts, align='center', alpha=0.5)
         plt.xticks(y_pos, y_labels)
@@ -101,6 +112,32 @@ def describe_what_you_see(cluster_labels,
     plt.xlabel('Cluster label')
     plt.ylabel('Number of samples')
     plt.title('Dataset: {}'.format(name))
+    plt.grid()
+    plt.show()
+
+
+def run_pca_and_plot(X, name):
+    pca = PCA()
+    pca.fit(X)
+    plt.figure()
+    plt.plot(np.arange(1, pca.explained_variance_ratio_.size + 1), np.cumsum(pca.explained_variance_ratio_))
+    plt.xticks(np.arange(1, pca.explained_variance_ratio_.size + 1))
+    plt.xlabel('Components')
+    plt.ylabel('Variance')
+    plt.title('{} : PCA variance'.format(name))
+    plt.grid()
+    plt.show()
+    # plot recunstruction error
+    reconstruction_error = []
+    for n_components in np.arange(1, pca.explained_variance_ratio_.size + 1):
+        pca = PCA(n_components=n_components)
+        reconstruction_error.append(np.sum(np.square(X - pca.inverse_transform(pca.fit_transform(X)))) / X.size)
+    plt.figure()
+    plt.plot(np.arange(1, pca.explained_variance_ratio_.size + 1), reconstruction_error)
+    plt.xticks(np.arange(1, pca.explained_variance_ratio_.size + 1))
+    plt.xlabel('Components')
+    plt.ylabel('Reconstruction Error')
+    plt.title('{} : PCA Reconstruction Error'.format(name))
     plt.grid()
     plt.show()
 
@@ -128,16 +165,21 @@ target = 'Result'
 
 data = pd.read_csv(phishing_path, names=names, header=None)
 
-x_train = data[features]
+x_train = preprocessing.scale(data[features])
 y_train = data[target]
 
 plot_name = "Phishing Detection"
 
-plot_silhoutte_score_kmeans(range(2, 10), x_train, plot_name)
-clfr = KMeans(n_clusters=best_k_for_kmeans)
-clfr.fit(x_train)
+# plot_score_em(range(2, 20), x_train, plot_name)
 
-print(np.shape(y_train))
-print(np.shape(clfr.predict(x_train)))
+run_pca_and_plot(x_train, plot_name)
 
-describe_what_you_see(clfr.predict(x_train), y_train, '{} - KMeans algorithm'.format(plot_name), x_train, features,best_k_for_kmeans)
+# plot_silhoutte_score_kmeans(range(2, 10), x_train, plot_name)
+# clfr = KMeans(n_clusters=best_k_for_kmeans)
+# clfr.fit(x_train)
+#
+# print(np.shape(y_train))
+# print(np.shape(clfr.predict(x_train)))
+#
+# describe_what_you_see(clfr.predict(x_train), y_train, '{} - KMeans algorithm'.format(plot_name), x_train, features,
+#                       best_k_for_kmeans)
