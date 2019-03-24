@@ -77,8 +77,8 @@ def simple_clustering(plot_name, X, kmeans_k, em_k, top_2_features_given=None):
 
 
 def explore_dimensionality_reduction():
-    base_experiment.run_pca_and_plot(x_train, plot_name)
-    base_experiment.run_ica_and_plot(x_train, plot_name, len(features))
+    base_experiment.run_pca_and_plot(x_train, plot_name, y_train)
+    base_experiment.run_ica_and_plot(x_train, plot_name, len(features), y_train)
     base_experiment.plot_features_and_variance(plot_name, features_data, features)
 
 
@@ -90,6 +90,7 @@ def dimensionality_reduction():
     pca = PCA(n_components=pca_best_components)
     pca_x_train = pca.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "PCA"), pca_x_train)
+    base_experiment.plot_eigen_values("{}-{}".format(plot_name, "PCA"), pca.explained_variance_)
     ica = FastICA(n_components=ica_best_components)
     ica_x_train = ica.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "ICA"), ica_x_train)

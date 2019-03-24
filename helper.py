@@ -5,8 +5,9 @@ from sklearn.svm import SVC
 from sklearn.datasets import load_digits
 from sklearn.model_selection import learning_curve
 
+
 # credit : taken from official examples of scikit-learn
-def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
+def plot_learning_curve(filename, estimator, title, X, y, ylim=None, cv=None,
                         n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
     """
     Generate a simple plot of the test and training learning curve.
@@ -84,6 +85,6 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
              label="Training score")
     plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
              label="Cross-validation score")
-
     plt.legend(loc="best")
-    return plt
+    plt.savefig('plots/{}.png'.format(filename))
+    plt.clf()

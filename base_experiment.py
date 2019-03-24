@@ -122,7 +122,24 @@ def describe_what_you_see(cluster_labels,
     plt.clf()
 
 
-def run_pca_and_plot(X, name):
+def get_gini_score(cluster_labels, classification_labels):
+    unique_cluster_labels = np.unique(cluster_labels)
+    overall_gini = 0.0
+    for cluster in unique_cluster_labels:
+        plt.figure()
+        classification_labels_in_this_cluster = classification_labels[cluster_labels == cluster]
+        # print(classification_labels_in_this_cluster)
+        size = classification_labels_in_this_cluster.size
+        unique, counts = np.unique(classification_labels_in_this_cluster, return_counts=True)
+        score = 0.0
+        for count in counts:
+            p = count / size
+            score += p * p
+        overall_gini += (1.0 - score) * (size / cluster_labels.size)
+    return overall_gini
+
+
+def run_pca_and_plot(X, name, classification_labels):
     pca = PCA()
     pca.fit(X)
     plt.figure()
@@ -136,9 +153,12 @@ def run_pca_and_plot(X, name):
     plt.clf()
     # plot recunstruction error
     reconstruction_error = []
+    gini_scores = []
     for n_components in np.arange(1, pca.explained_variance_ratio_.size + 1):
         pca = PCA(n_components=n_components)
-        reconstruction_error.append(np.sum(np.square(X - pca.inverse_transform(pca.fit_transform(X)))) / X.size)
+        classes = pca.fit_transform(X)
+        gini_scores.append(get_gini_score(classes, classification_labels))
+        reconstruction_error.append(np.sum(np.square(X - pca.inverse_transform(classes))) / X.size)
     plt.figure()
     plt.plot(np.arange(1, pca.explained_variance_ratio_.size + 1), reconstruction_error)
     plt.xticks(np.arange(1, pca.explained_variance_ratio_.size + 1))
@@ -149,13 +169,26 @@ def run_pca_and_plot(X, name):
     plt.savefig('plots/{}-pca-reconstruction.png'.format(name))
     plt.clf()
 
+    plt.figure()
+    plt.plot(np.arange(1, pca.explained_variance_ratio_.size + 1), gini_scores)
+    plt.xticks(np.arange(1, pca.explained_variance_ratio_.size + 1))
+    plt.xlabel('Components')
+    plt.ylabel('Gini Score')
+    plt.title('{} : PCA Gini'.format(name))
+    plt.grid()
+    plt.savefig('plots/{}-pca-gini.png'.format(name))
+    plt.clf()
 
-def run_ica_and_plot(X, name, number_of_features):
+
+def run_ica_and_plot(X, name, number_of_features, classification_labels):
     # plot recunstruction error
     reconstruction_error = []
+    gini_scores = []
     for n_components in np.arange(1, number_of_features + 1):
         ica = FastICA(n_components=n_components)
-        reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(ica.fit_transform(X)))) / X.size)
+        classes = ica.fit_transform(X)
+        gini_scores.append(get_gini_score(classes, classification_labels))
+        reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(classes))) / X.size)
     plt.figure()
     plt.plot(np.arange(1, number_of_features + 1), reconstruction_error)
     plt.xticks(np.arange(1, number_of_features + 1))
@@ -164,6 +197,16 @@ def run_ica_and_plot(X, name, number_of_features):
     plt.title('{} : ICA Reconstruction Error'.format(name))
     plt.grid()
     plt.savefig('plots/{}-ica-reconstruction.png'.format(name))
+    plt.clf()
+
+    plt.figure()
+    plt.plot(np.arange(1, number_of_features + 1), gini_scores)
+    plt.xticks(np.arange(1, number_of_features + 1))
+    plt.xlabel('Components')
+    plt.ylabel('Gini Score')
+    plt.title('{} : ICA Gini'.format(name))
+    plt.grid()
+    plt.savefig('plots/{}-ica-gini.png'.format(name))
     plt.clf()
 
 
@@ -212,6 +255,16 @@ def plot_points(name, X, top_2_features, classification=None, centers=None, k=No
         plt.ylabel("Feature space for the 2nd feature")
         plt.savefig('plots/{}-points.png'.format(name))
         plt.clf()
+
+
+def plot_eigen_values(plotname, eigen_values):
+    plt.figure()
+    y_pos = np.arange(len(eigen_values))
+    plt.bar(y_pos, eigen_values, align='center', alpha=0.5)
+    plt.ylabel('Eigen Value')
+    plt.title('{} : Eigen Values'.format(plotname))
+    plt.savefig('plots/{}-eigen-values.png'.format(plotname))
+    plt.clf()
 
 
 def plot_points_3d(name, X):
