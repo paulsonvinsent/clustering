@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.decomposition import FastICA
+from sklearn.random_projection import GaussianRandomProjection
+import matplotlib.cm as cm
 
 random.seed(100)
 np.random.seed(100)
@@ -143,11 +145,27 @@ def run_pca_and_plot(X, name):
     plt.show()
 
 
-def run_ica_and_plot(X, name, number_of_componenets):
+def run_ica_and_plot(X, name, number_of_features):
+    # plot recunstruction error
+    reconstruction_error = []
+    for n_components in np.arange(1, number_of_features + 1):
+        ica = FastICA(n_components=n_components)
+        reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(ica.fit_transform(X)))) / X.size)
+    plt.figure()
+    plt.plot(np.arange(1, number_of_features + 1), reconstruction_error)
+    plt.xticks(np.arange(1, number_of_features + 1))
+    plt.xlabel('Components')
+    plt.ylabel('Reconstruction Error')
+    plt.title('{} : ICA Reconstruction Error'.format(name))
+    plt.grid()
+    plt.show()
+
+
+def run_random_projection_and_plot(X, name, number_of_componenets):
     # plot recunstruction error
     reconstruction_error = []
     for n_components in np.arange(1, number_of_componenets + 1):
-        ica = FastICA(n_components=n_components)
+        ica = GaussianRandomProjection(n_components=n_components)
         reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(ica.fit_transform(X)))) / X.size)
     plt.figure()
     plt.plot(np.arange(1, number_of_componenets + 1), reconstruction_error)
@@ -157,6 +175,37 @@ def run_ica_and_plot(X, name, number_of_componenets):
     plt.title('{} : ICA Reconstruction Error'.format(name))
     plt.grid()
     plt.show()
+
+
+def identify_top_2_features(X):
+    variances = np.var(X, axis=0)
+    tolist = variances.tolist()
+    return sorted(range(len(tolist)), key=lambda x: tolist[x])[-2:]
+
+
+def plot_points(name, X, top_2_features, classification=None, centers=None, k=None):
+    if classification is not None:
+        cmap = cm.get_cmap("Spectral")
+        colors = cmap(classification.astype(float) / k)
+        plt.figure()
+        plt.scatter(X[:, top_2_features[0]], X[:, top_2_features[1]], marker='.', s=30, lw=0, alpha=0.7,
+                    c=colors, edgecolor='k')
+        plt.scatter(centers[:, 0], centers[:, 1], marker='o',
+                    c="white", alpha=1, s=200, edgecolor='k')
+        for i, c in enumerate(centers):
+            plt.scatter(c[0], c[1], marker='$%d$' % i, alpha=1,
+                        s=50, edgecolor='k')
+        plt.title("{}: The visualization of the clustered data.".format(name))
+        plt.xlabel("Feature space for the 1st feature")
+        plt.ylabel("Feature space for the 2nd feature")
+        plt.show()
+    else:
+        plt.figure()
+        plt.scatter(X[:, top_2_features[0]], X[:, top_2_features[1]], marker='.', s=30, lw=0, alpha=0.7, edgecolor='k')
+        plt.title("{}: The visualization of points".format(name))
+        plt.xlabel("Feature space for the 1st feature")
+        plt.ylabel("Feature space for the 2nd feature")
+        plt.show()
 
 
 phishing_path = ""
@@ -182,6 +231,8 @@ target = 'Result'
 
 data = pd.read_csv(phishing_path, names=names, header=None)
 
+top_2_features = identify_top_2_features(data[features])
+
 x_train = preprocessing.scale(data[features])
 y_train = data[target]
 
@@ -190,13 +241,23 @@ plot_name = "Phishing Detection"
 # plot_score_em(range(2, 20), x_train, plot_name)
 
 # run_pca_and_plot(x_train, plot_name)
+# print(np.shape(np.var(data[features], axis=0)))
+# print(np.var(data[features], axis=0))
+# print((np.var(data[features], axis=0)).argsort()[-2:])
 
-run_ica_and_plot(x_train,plot_name,len(features))
+# run_random_projection_and_plot(x_train,plot_name,len(features))
 
 # plot_silhoutte_score_kmeans(range(2, 10), x_train, plot_name)
-# clfr = KMeans(n_clusters=best_k_for_kmeans)
-# clfr.fit(x_train)
+clfr = KMeans(n_clusters=best_k_for_kmeans)
+clfr.fit(x_train)
+
+plot_points("{}:KMeans".format(plot_name), data[features].values, top_2_features, clfr.predict(x_train), clfr.cluster_centers_,
+            best_k_for_kmeans)
 #
+
+
+
+# plot_points("{}:KMeans".format(plot_name), data[features].values, top_2_features)
 # print(np.shape(y_train))
 # print(np.shape(clfr.predict(x_train)))
 #
