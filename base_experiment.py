@@ -153,12 +153,10 @@ def run_pca_and_plot(X, name, classification_labels):
     plt.clf()
     # plot recunstruction error
     reconstruction_error = []
-    gini_scores = []
     for n_components in np.arange(1, pca.explained_variance_ratio_.size + 1):
         pca = PCA(n_components=n_components)
-        classes = pca.fit_transform(X)
-        gini_scores.append(get_gini_score(classes, classification_labels))
-        reconstruction_error.append(np.sum(np.square(X - pca.inverse_transform(classes))) / X.size)
+        pca.fit(X)
+        reconstruction_error.append(np.sum(np.square(X - pca.inverse_transform(pca.transform(X)))) / X.size)
     plt.figure()
     plt.plot(np.arange(1, pca.explained_variance_ratio_.size + 1), reconstruction_error)
     plt.xticks(np.arange(1, pca.explained_variance_ratio_.size + 1))
@@ -169,26 +167,14 @@ def run_pca_and_plot(X, name, classification_labels):
     plt.savefig('plots/{}-pca-reconstruction.png'.format(name))
     plt.clf()
 
-    plt.figure()
-    plt.plot(np.arange(1, pca.explained_variance_ratio_.size + 1), gini_scores)
-    plt.xticks(np.arange(1, pca.explained_variance_ratio_.size + 1))
-    plt.xlabel('Components')
-    plt.ylabel('Gini Score')
-    plt.title('{} : PCA Gini'.format(name))
-    plt.grid()
-    plt.savefig('plots/{}-pca-gini.png'.format(name))
-    plt.clf()
-
 
 def run_ica_and_plot(X, name, number_of_features, classification_labels):
     # plot recunstruction error
     reconstruction_error = []
-    gini_scores = []
     for n_components in np.arange(1, number_of_features + 1):
         ica = FastICA(n_components=n_components)
-        classes = ica.fit_transform(X)
-        gini_scores.append(get_gini_score(classes, classification_labels))
-        reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(classes))) / X.size)
+        transformed_data = ica.fit_transform(X)
+        reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(transformed_data))) / X.size)
     plt.figure()
     plt.plot(np.arange(1, number_of_features + 1), reconstruction_error)
     plt.xticks(np.arange(1, number_of_features + 1))
@@ -197,16 +183,6 @@ def run_ica_and_plot(X, name, number_of_features, classification_labels):
     plt.title('{} : ICA Reconstruction Error'.format(name))
     plt.grid()
     plt.savefig('plots/{}-ica-reconstruction.png'.format(name))
-    plt.clf()
-
-    plt.figure()
-    plt.plot(np.arange(1, number_of_features + 1), gini_scores)
-    plt.xticks(np.arange(1, number_of_features + 1))
-    plt.xlabel('Components')
-    plt.ylabel('Gini Score')
-    plt.title('{} : ICA Gini'.format(name))
-    plt.grid()
-    plt.savefig('plots/{}-ica-gini.png'.format(name))
     plt.clf()
 
 
