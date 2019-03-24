@@ -14,6 +14,7 @@ from sklearn.decomposition import PCA
 from sklearn.decomposition import FastICA
 from sklearn.random_projection import GaussianRandomProjection
 import matplotlib.cm as cm
+from sklearn.feature_selection import VarianceThreshold
 
 random.seed(100)
 np.random.seed(100)
@@ -92,7 +93,6 @@ def describe_what_you_see(cluster_labels,
     for cluster in unique_cluster_labels:
         plt.plot()
         classification_labels_in_this_cluster = classification_labels[cluster_labels == cluster]
-        print("what i wannt")
         print(np.shape(classification_labels_in_this_cluster))
 
         # print(classification_labels_in_this_cluster)
@@ -177,6 +177,18 @@ def run_random_projection_and_plot(X, name, number_of_componenets):
     plt.show()
 
 
+def selecting_features_with_low_variance(name, X, features):
+    variances = np.var(X, axis=0)
+    plt.figure()
+    plt.bar(np.arange(len(features)), variances.tolist(), align='center', alpha=0.5)
+    plt.xticks(np.arange(len(features)), np.arange(len(features)))
+    plt.xlabel('Features')
+    plt.ylabel('Variance')
+    plt.title("{} : Features and Variances".format(name))
+    plt.grid()
+    plt.show()
+
+
 def identify_top_2_features(X):
     variances = np.var(X, axis=0)
     tolist = variances.tolist()
@@ -251,10 +263,12 @@ plot_name = "Phishing Detection"
 clfr = KMeans(n_clusters=best_k_for_kmeans)
 clfr.fit(x_train)
 
-plot_points("{}:KMeans".format(plot_name), data[features].values, top_2_features, clfr.predict(x_train), clfr.cluster_centers_,
-            best_k_for_kmeans)
-#
+# plot_points("{}:KMeans".format(plot_name), data[features].values, top_2_features, clfr.predict(x_train),
+#             clfr.cluster_centers_,
+#             best_k_for_kmeans)
 
+selecting_features_with_low_variance(plot_name, data[features], features)
+#
 
 
 # plot_points("{}:KMeans".format(plot_name), data[features].values, top_2_features)
