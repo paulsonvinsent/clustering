@@ -33,18 +33,13 @@ data = pd.read_csv(phishing_path, names=names, header=None)
 
 data = data.apply(pd.to_numeric, args=('coerce',))
 
-
-print(data.dtypes)
+# print(data.dtypes)
 data = data.dropna()
 
-
-
-
-
-print(data)
+# print(data)
 features_data = data[features]
 
-# top_2_features = base_experiment.identify_top_2_features(features)
+top_2_features = base_experiment.identify_top_2_features(features_data)
 
 x_train = preprocessing.scale(features_data)
 y_train = data[target]
@@ -56,29 +51,24 @@ base_experiment.plot_elbow_method_graph_kmeans(range(2, 20), x_train, plot_name)
 base_experiment.plot_silhoutte_score_kmeans(range(2, 20), x_train, plot_name)
 base_experiment.plot_elbow_method_graph_kmeans(range(2, 20), x_train, plot_name)
 #
-# kmeans_best_k = 3
-# em_best_k = 3
-#
-# clfr = KMeans(n_clusters=kmeans_best_k)
-# clfr.fit(x_train)
-#
-# base_experiment.describe_what_you_see(clfr.predict(x_train), y_train, plot_name,
-#                                       kmeans_best_k, "K Means (k={})".format(kmeans_best_k))
-#
-# base_experiment.describe_what_you_see(clfr.predict(x_train), y_train, plot_name,
-#                                       4, "K Means (k={})".format(4))
-#
-# clfr = mixture.GaussianMixture(n_components=em_best_k, covariance_type='full')
-# clfr.fit(x_train)
-# base_experiment.describe_what_you_see(clfr.predict(x_train), y_train, plot_name,
-#                                       kmeans_best_k, "EM (k={})".format(em_best_k))
-#
-# base_experiment.describe_what_you_see(clfr.predict(x_train), y_train, plot_name,
-#                                       4, "EM (k={})".format(4))
-#
-# base_experiment.run_pca_and_plot(x_train, plot_name)
-#
-# base_experiment.run_ica_and_plot(x_train, plot_name, len(features))
+kmeans_best_k = 5
+em_best_k = 12
+
+clfr = KMeans(n_clusters=kmeans_best_k)
+clfr.fit(x_train)
+
+base_experiment.describe_what_you_see(clfr.predict(x_train), y_train, plot_name,
+                                      kmeans_best_k, "K Means (k={})".format(kmeans_best_k))
+
+clfr = mixture.GaussianMixture(n_components=em_best_k, covariance_type='full')
+clfr.fit(x_train)
+base_experiment.describe_what_you_see(clfr.predict(x_train), y_train, plot_name,
+                                      kmeans_best_k, "EM (k={})".format(em_best_k))
+
+
+base_experiment.run_pca_and_plot(x_train, plot_name)
+
+base_experiment.run_ica_and_plot(x_train, plot_name, len(features))
 #
 # for k in range(1, 10):
 #     rp = GaussianRandomProjection(n_components=k)
