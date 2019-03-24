@@ -13,7 +13,6 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import silhouette_score
 
-
 random.seed(100)
 np.random.seed(100)
 
@@ -33,6 +32,7 @@ def plot_elbow_method_graph_kmeans(K, X, name):
     plt.ylabel('Distortion')
     plt.title('{} KMeans : The Elbow Method showing the optimal k'.format(name))
     plt.savefig('plots/{}-elbow-kmeans.png'.format(name))
+    plt.clf()
 
 
 def plot_score_em(K, X, name):
@@ -52,6 +52,7 @@ def plot_score_em(K, X, name):
     plt.ylabel('Silhouette Scores')
     plt.title('{} EM : Silhouette Method showing the optimal k'.format(name))
     plt.savefig('plots/{}-silhouette-em.png'.format(name))
+    plt.clf()
     # Plot  bic
     plt.figure()
     plt.plot(K, bic_scores, 'bx-')
@@ -59,6 +60,7 @@ def plot_score_em(K, X, name):
     plt.ylabel('BIC values')
     plt.title('{} EM : BIC Method showing the optimal k'.format(name))
     plt.savefig('plots/{}-bic-em.png'.format(name))
+    plt.clf()
 
 
 def plot_silhoutte_score_kmeans(K, X, name):
@@ -76,6 +78,7 @@ def plot_silhoutte_score_kmeans(K, X, name):
     plt.ylabel('Silhouette Scores')
     plt.title('{} KMeans : Silhouette Method showing the optimal k'.format(name))
     plt.savefig('plots/{}-silhouette-kmeans.png'.format(name))
+    plt.clf()
 
 
 def describe_what_you_see(cluster_labels,
@@ -97,6 +100,7 @@ def describe_what_you_see(cluster_labels,
         plt.ylabel('Counts')
         plt.title('{} : Simple clustering results ,Cluster {} '.format(name, cluster))
         plt.savefig('plots/{}-{}-cluster-{}-labels.png'.format(name, algorithm_name, cluster))
+        plt.clf()
     plt.figure()
     plt.hist(cluster_labels, bins=np.arange(0, number_of_clusters + 1) - 0.5, rwidth=0.5, zorder=2)
     plt.xticks(np.arange(0, number_of_clusters))
@@ -105,6 +109,7 @@ def describe_what_you_see(cluster_labels,
     plt.title('Dataset: {}'.format(name))
     plt.grid()
     plt.savefig('plots/{}-{}-cluster-counts.png'.format(name, algorithm_name))
+    plt.clf()
 
 
 def run_pca_and_plot(X, name):
@@ -117,8 +122,8 @@ def run_pca_and_plot(X, name):
     plt.ylabel('Variance')
     plt.title('{} : PCA variance'.format(name))
     plt.grid()
-    fig = plt.figure()
-    fig.savefig('plots/{}-pca-variance.png'.format(name), dpi=fig.dpi)
+    plt.savefig('plots/{}-pca-variance.png'.format(name))
+    plt.clf()
     # plot recunstruction error
     reconstruction_error = []
     for n_components in np.arange(1, pca.explained_variance_ratio_.size + 1):
@@ -132,6 +137,7 @@ def run_pca_and_plot(X, name):
     plt.title('{} : PCA Reconstruction Error'.format(name))
     plt.grid()
     plt.savefig('plots/{}-pca-reconstruction.png'.format(name))
+    plt.clf()
 
 
 def run_ica_and_plot(X, name, number_of_features):
@@ -148,22 +154,7 @@ def run_ica_and_plot(X, name, number_of_features):
     plt.title('{} : ICA Reconstruction Error'.format(name))
     plt.grid()
     plt.savefig('plots/{}-ica-reconstruction.png'.format(name))
-
-
-def run_random_projection_and_plot(X, name, number_of_componenets):
-    # plot recunstruction error
-    reconstruction_error = []
-    for n_components in np.arange(1, number_of_componenets + 1):
-
-        reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(ica.fit_transform(X)))) / X.size)
-    plt.figure()
-    plt.plot(np.arange(1, number_of_componenets + 1), reconstruction_error)
-    plt.xticks(np.arange(1, number_of_componenets + 1))
-    plt.xlabel('Components')
-    plt.ylabel('Reconstruction Error')
-    plt.title('{} : Random projection Reconstruction Error'.format(name))
-    plt.grid()
-    plt.savefig('plots/{}-random-projection-reconstruction.png'.format(name))
+    plt.clf()
 
 
 def selecting_features_with_low_variance(name, X, features, variance_threshold):
@@ -176,6 +167,7 @@ def selecting_features_with_low_variance(name, X, features, variance_threshold):
     plt.title("{} : Features and Variances".format(name))
     plt.grid()
     plt.savefig('plots/{}-variance-based-filtering.png'.format(name))
+    plt.clf()
     sel = VarianceThreshold(threshold=variance_threshold)
     return sel.fit_transform(X)
 
@@ -202,6 +194,7 @@ def plot_points(name, X, top_2_features, classification=None, centers=None, k=No
         plt.xlabel("Feature space for the 1st feature")
         plt.ylabel("Feature space for the 2nd feature")
         plt.savefig('plots/{}-{}-clusters.png'.format(name, algorithm_name))
+        plt.clf()
     else:
         plt.figure()
         plt.scatter(X[:, top_2_features[0]], X[:, top_2_features[1]], marker='.', s=30, lw=0, alpha=0.7, edgecolor='k')
@@ -209,3 +202,18 @@ def plot_points(name, X, top_2_features, classification=None, centers=None, k=No
         plt.xlabel("Feature space for the 1st feature")
         plt.ylabel("Feature space for the 2nd feature")
         plt.savefig('plots/{}-points.png'.format(name))
+        plt.clf()
+
+
+def plot_points_3d(name,X):
+    from mpl_toolkits.mplot3d import Axes3D
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(X[:, 0], X[:, 1], X[:, 2])
+
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    plt.savefig('plots/{}-points.png'.format(name))
+    plt.clf()
