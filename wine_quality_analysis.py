@@ -137,6 +137,6 @@ def clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_
 kmeans_best_k = 8
 em_best_k = 7
 
-# simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
-# explore_dimensionality_reduction()
+simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
+explore_dimensionality_reduction()
 dimensionality_reduction()
