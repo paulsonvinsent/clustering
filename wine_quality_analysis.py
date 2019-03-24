@@ -10,36 +10,21 @@ from sklearn.random_projection import GaussianRandomProjection
 
 import base_experiment
 
-breast_cancer_path = ""
+wine_quality_path = ""
 if len(sys.argv) > 1:
-    breast_cancer_path = sys.argv[1]
-    print("Reading data from provided path {}".format(breast_cancer_path))
+    wine_quality_path = sys.argv[1]
+    print("Reading data from provided path {}".format(wine_quality_path))
 else:
-    breast_cancer_path = 'data/breast-cancer-wisconsin.data'
+    wine_quality_path = 'data/winequality-red.csv'
 
-names = ['Sample code number', 'Clump Thickness',
-         'Uniformity of Cell Size', 'Uniformity of Cell Shape', 'Marginal Adhesion',
-         'Single Epithelial Cell Size',
-         'Bare Nuclei', 'Bland Chromatin', 'Normal Nucleoli',
-         'Mitoses', 'Class']
+features = ['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar', 'chlorides', 'free sulfur dioxide',
+            'total sulfur dioxide', 'density', 'pH', 'sulphates', 'alcohol']
+target = 'quality'
 
-features = ['Clump Thickness',
-            'Uniformity of Cell Size', 'Uniformity of Cell Shape', 'Marginal Adhesion',
-            'Single Epithelial Cell Size',
-            'Bare Nuclei', 'Bland Chromatin', 'Normal Nucleoli',
-            'Mitoses']
-target = 'Class'
+plot_name = "Wine Quality"
 
-plot_name = "Breast Cancer Detection"
+data = pd.read_csv(wine_quality_path)
 
-data = pd.read_csv(breast_cancer_path, names=names, header=None)
-
-data = data.apply(pd.to_numeric, args=('coerce',))
-
-# print(data.dtypes)
-data = data.dropna()
-
-# print(data)
 features_data = data[features]
 
 top_2_features = base_experiment.identify_top_2_features(features_data)
@@ -123,7 +108,7 @@ def find_best_k_for_reduced_features(ica_x_train, pca_x_train, rp_x_train, varia
 
 def clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_train):
     ica_kmeans_k = 5
-    ica_em_k = 6
+    ica_em_k = 8
     pca_em_k = 4
     pca_kmeans_k = 5
     rp_em_k = 12
@@ -140,8 +125,8 @@ def clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_
                       variance_filter_em_k, base_experiment.identify_top_2_features(variance_x_train))
 
 
-kmeans_best_k = 5
-em_best_k = 12
+kmeans_best_k = 8
+em_best_k = 7
 
 simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
 dimensionality_reduction()
