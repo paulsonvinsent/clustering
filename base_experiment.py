@@ -12,14 +12,14 @@ from sklearn.decomposition import FastICA
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import silhouette_score
-from sklearn.random_projection import GaussianRandomProjection
+
 
 random.seed(100)
 np.random.seed(100)
 
 
 def plot_elbow_method_graph_kmeans(K, X, name):
-    plt.plot()
+    plt.figure()
     # k means determine k
     distortions = []
     for k in K:
@@ -38,22 +38,31 @@ def plot_elbow_method_graph_kmeans(K, X, name):
 def plot_score_em(K, X, name):
     # k means determine k
     silhouette_scores = []
+    bic_scores = []
     for k in K:
         clfr = mixture.GaussianMixture(n_components=k, covariance_type='full')
         clfr.fit(X)
+        bic_scores.append(clfr.bic(X))
         silhouette_scores.append(silhouette_score(X, clfr.predict(X)))
 
     # Plot the elbow
-    plt.plot()
+    plt.figure()
     plt.plot(K, silhouette_scores, 'bx-')
     plt.xlabel('k')
     plt.ylabel('Silhouette Scores')
     plt.title('{} EM : Silhouette Method showing the optimal k'.format(name))
     plt.savefig('plots/{}-silhouette-em.png'.format(name))
+    # Plot  bic
+    plt.figure()
+    plt.plot(K, bic_scores, 'bx-')
+    plt.xlabel('k')
+    plt.ylabel('BIC values')
+    plt.title('{} EM : BIC Method showing the optimal k'.format(name))
+    plt.savefig('plots/{}-bic-em.png'.format(name))
 
 
 def plot_silhoutte_score_kmeans(K, X, name):
-    plt.plot()
+    plt.figure()
     # k means determine k
     silhouette_scores = []
     for k in K:
@@ -76,7 +85,7 @@ def describe_what_you_see(cluster_labels,
                           algorithm_name):
     unique_cluster_labels = np.unique(cluster_labels)
     for cluster in unique_cluster_labels:
-        plt.plot()
+        plt.figure()
         classification_labels_in_this_cluster = classification_labels[cluster_labels == cluster]
 
         # print(classification_labels_in_this_cluster)
@@ -145,7 +154,7 @@ def run_random_projection_and_plot(X, name, number_of_componenets):
     # plot recunstruction error
     reconstruction_error = []
     for n_components in np.arange(1, number_of_componenets + 1):
-        ica = GaussianRandomProjection(n_components=n_components)
+
         reconstruction_error.append(np.sum(np.square(X - ica.inverse_transform(ica.fit_transform(X)))) / X.size)
     plt.figure()
     plt.plot(np.arange(1, number_of_componenets + 1), reconstruction_error)
