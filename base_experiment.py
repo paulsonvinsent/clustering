@@ -161,7 +161,8 @@ def selecting_features_with_low_variance(name, X, features, variance_threshold):
     variances = np.var(X, axis=0)
     plt.figure()
     plt.bar(np.arange(len(features)), variances.tolist(), align='center', alpha=0.5)
-    plt.xticks(np.arange(len(features)), np.arange(len(features)))
+    if len(features) < 20:
+        plt.xticks(np.arange(len(features)), features)
     plt.xlabel('Features')
     plt.ylabel('Variance')
     plt.title("{} : Features and Variances".format(name))
@@ -185,10 +186,10 @@ def plot_points(name, X, top_2_features, classification=None, centers=None, k=No
         plt.figure()
         plt.scatter(X[:, top_2_features[0]], X[:, top_2_features[1]], marker='.', s=30, lw=0, alpha=0.7,
                     c=colors, edgecolor='k')
-        plt.scatter(centers[:, 0], centers[:, 1], marker='o',
+        plt.scatter(centers[:, top_2_features[0]], centers[:, top_2_features[1]], marker='o',
                     c="white", alpha=1, s=200, edgecolor='k')
         for i, c in enumerate(centers):
-            plt.scatter(c[0], c[1], marker='$%d$' % i, alpha=1,
+            plt.scatter(c[top_2_features[0]], c[top_2_features[1]], marker='$%d$' % i, alpha=1,
                         s=50, edgecolor='k')
         plt.title("{}:{} The visualization of the clustered data.".format(name, algorithm_name))
         plt.xlabel("Feature space for the 1st feature")
@@ -205,15 +206,15 @@ def plot_points(name, X, top_2_features, classification=None, centers=None, k=No
         plt.clf()
 
 
-def plot_points_3d(name,X):
+def plot_points_3d(name, X):
     from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(X[:, 0], X[:, 1], X[:, 2])
 
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    ax.set_xlabel('PC 1')
+    ax.set_ylabel('PC 2')
+    ax.set_zlabel('PC 3')
     plt.savefig('plots/{}-points.png'.format(name))
     plt.clf()
