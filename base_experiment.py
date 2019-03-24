@@ -87,20 +87,20 @@ def describe_what_you_see(cluster_labels,
                           number_of_clusters,
                           algorithm_name):
     unique_cluster_labels = np.unique(cluster_labels)
+    gini_indexes = []
+    overall_gini = 0.0
     for cluster in unique_cluster_labels:
         plt.figure()
         classification_labels_in_this_cluster = classification_labels[cluster_labels == cluster]
-
         # print(classification_labels_in_this_cluster)
+        size = classification_labels_in_this_cluster.size
         unique, counts = np.unique(classification_labels_in_this_cluster, return_counts=True)
-        y_pos = np.arange(len(unique))
-        y_labels = unique.tolist()
-        plt.bar(y_pos, counts, align='center', alpha=0.5)
-        plt.xticks(y_pos, y_labels)
-        plt.ylabel('Counts')
-        plt.title('{} : Simple clustering results ,Cluster {} '.format(name, cluster))
-        plt.savefig('plots/{}-{}-cluster-{}-labels.png'.format(name, algorithm_name, cluster))
-        plt.clf()
+        score = 0.0
+        for count in counts:
+            p = count / size
+            score += p * p
+        overall_gini += (1.0 - score) * (size / cluster_labels.size)
+        gini_indexes.append(1.0 - score)
     plt.figure()
     plt.hist(cluster_labels, bins=np.arange(0, number_of_clusters + 1) - 0.5, rwidth=0.5, zorder=2)
     plt.xticks(np.arange(0, number_of_clusters))
@@ -109,6 +109,16 @@ def describe_what_you_see(cluster_labels,
     plt.title('Dataset: {}'.format(name))
     plt.grid()
     plt.savefig('plots/{}-{}-cluster-counts.png'.format(name, algorithm_name))
+    plt.clf()
+    plt.figure()
+    y_pos = np.arange(len(unique_cluster_labels))
+    y_labels = unique_cluster_labels.tolist()
+    plt.bar(y_pos, gini_indexes, align='center', alpha=0.5)
+    plt.xticks(y_pos, y_labels)
+    plt.ylabel('Gini Index')
+    plt.ylim(bottom=0.0, top=1.0)
+    plt.title('{} : Entropy (Overall Gini={})'.format(name, round(overall_gini, 3)))
+    plt.savefig('plots/{}-{}-clusters-and-entropy.png'.format(name, algorithm_name))
     plt.clf()
 
 

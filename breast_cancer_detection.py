@@ -1,20 +1,12 @@
 import sys
 
-import numpy as np
 import pandas as pd
+from sklearn import mixture
 from sklearn import preprocessing
-from sklearn.cluster import KMeans
-from sklearn import mixture
-from sklearn.random_projection import GaussianRandomProjection
-from scipy.spatial.distance import cdist
-from sklearn import mixture
-
 from sklearn.cluster import KMeans
 from sklearn.decomposition import FastICA
 from sklearn.decomposition import PCA
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.metrics import silhouette_score
-import matplotlib.pyplot as plt
+from sklearn.random_projection import GaussianRandomProjection
 
 import base_experiment
 
@@ -151,12 +143,5 @@ def clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_
 kmeans_best_k = 5
 em_best_k = 12
 
-# simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
+simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
 dimensionality_reduction()
-
-# plot_points("{}:KMeans".format(plot_name), data[features].values, top_2_features)
-# print(np.shape(y_train))
-# print(np.shape(clfr.predict(x_train)))
-#
-
-print(np.var(features_data, axis=0))
