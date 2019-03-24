@@ -7,6 +7,7 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import FastICA
 from sklearn.decomposition import PCA
 from sklearn.random_projection import GaussianRandomProjection
+from sklearn.feature_selection import VarianceThreshold
 
 import base_experiment
 
@@ -73,7 +74,12 @@ def simple_clustering(plot_name, X, kmeans_k, em_k, top_2_features_given=None):
                                           kmeans_k, "EM (k={})".format(em_k))
     base_experiment.plot_points(plot_name, X, top_2_features_given, clfr.predict(X), clfr.means_,
                                 kmeans_k, "EM k={}".format(em_k))
-    base_experiment.run_pca_and_plot(X, plot_name)
+
+
+def explore_dimensionality_reduction():
+    base_experiment.run_pca_and_plot(x_train, plot_name)
+    base_experiment.run_ica_and_plot(x_train, plot_name, len(features))
+    base_experiment.plot_features_and_variance(plot_name, features_data, features)
 
 
 def dimensionality_reduction():
@@ -84,17 +90,15 @@ def dimensionality_reduction():
     pca = PCA(n_components=pca_best_components)
     pca_x_train = pca.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "PCA"), pca_x_train)
-    base_experiment.run_ica_and_plot(x_train, plot_name, len(features))
     ica = FastICA(n_components=ica_best_components)
     ica_x_train = ica.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "ICA"), ica_x_train)
     rp = GaussianRandomProjection(n_components=rp_chosen_components)
     rp_x_train = rp.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "Random Projection"), rp_x_train)
-    variance_x_train = base_experiment.selecting_features_with_low_variance(plot_name, features_data, features,
-                                                                            variance_threshold)
-    # find_best_k_for_reduced_features(ica_x_train, pca_x_train, rp_x_train, variance_x_train)
-
+    variance_x_train = VarianceThreshold(threshold=variance_threshold).fit_transform(features_data)
+    variance_x_train = preprocessing.scale(variance_x_train)
+    find_best_k_for_reduced_features(ica_x_train, pca_x_train, rp_x_train, variance_x_train)
     clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_train)
 
 
@@ -144,4 +148,5 @@ kmeans_best_k = 5
 em_best_k = 12
 
 simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
+explore_dimensionality_reduction()
 dimensionality_reduction()

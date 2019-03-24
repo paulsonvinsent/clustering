@@ -167,20 +167,18 @@ def run_ica_and_plot(X, name, number_of_features):
     plt.clf()
 
 
-def selecting_features_with_low_variance(name, X, features, variance_threshold):
+def plot_features_and_variance(name, X, features):
     variances = np.var(X, axis=0)
     plt.figure()
     plt.bar(np.arange(len(features)), variances.tolist(), align='center', alpha=0.5)
-    if len(features) < 20:
-        plt.xticks(np.arange(len(features)), features)
+    # if len(features) < 10:
+    #     plt.xticks(np.arange(len(features)), features)
     plt.xlabel('Features')
     plt.ylabel('Variance')
     plt.title("{} : Features and Variances".format(name))
     plt.grid()
     plt.savefig('plots/{}-variance-based-filtering.png'.format(name))
     plt.clf()
-    sel = VarianceThreshold(threshold=variance_threshold)
-    return sel.fit_transform(X)
 
 
 def identify_top_2_features(X):

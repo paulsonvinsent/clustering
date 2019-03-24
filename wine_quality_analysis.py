@@ -6,6 +6,8 @@ from sklearn import preprocessing
 from sklearn.cluster import KMeans
 from sklearn.decomposition import FastICA
 from sklearn.decomposition import PCA
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.random_projection import GaussianRandomProjection
 
 import base_experiment
@@ -35,6 +37,9 @@ base_experiment.plot_points(plot_name, x_train, top_2_features)
 
 y_train = data[target]
 
+min_max_scaler = MinMaxScaler(feature_range=(0, 1))
+min_max_scaler.fit(features_data)
+
 
 def simple_clustering(plot_name, X, kmeans_k, em_k, top_2_features_given=None):
     if top_2_features_given is None:
@@ -58,28 +63,32 @@ def simple_clustering(plot_name, X, kmeans_k, em_k, top_2_features_given=None):
                                           kmeans_k, "EM (k={})".format(em_k))
     base_experiment.plot_points(plot_name, X, top_2_features_given, clfr.predict(X), clfr.means_,
                                 kmeans_k, "EM k={}".format(em_k))
-    base_experiment.run_pca_and_plot(X, plot_name)
+
+
+def explore_dimensionality_reduction():
+    base_experiment.run_pca_and_plot(x_train, plot_name)
+    base_experiment.run_ica_and_plot(x_train, plot_name, len(features))
+    base_experiment.plot_features_and_variance(plot_name, min_max_scaler.transform(features_data), features)
 
 
 def dimensionality_reduction():
-    ica_best_components = 3
-    pca_best_components = 3
+    ica_best_components = 5
+    pca_best_components = 6
     rp_chosen_components = 3
-    variance_threshold = 9
+    variance_threshold = 0.02
     pca = PCA(n_components=pca_best_components)
     pca_x_train = pca.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "PCA"), pca_x_train)
-    base_experiment.run_ica_and_plot(x_train, plot_name, len(features))
     ica = FastICA(n_components=ica_best_components)
     ica_x_train = ica.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "ICA"), ica_x_train)
     rp = GaussianRandomProjection(n_components=rp_chosen_components)
     rp_x_train = rp.fit_transform(x_train)
     base_experiment.plot_points_3d("{}-{}".format(plot_name, "Random Projection"), rp_x_train)
-    variance_x_train = base_experiment.selecting_features_with_low_variance(plot_name, features_data, features,
-                                                                            variance_threshold)
-    # find_best_k_for_reduced_features(ica_x_train, pca_x_train, rp_x_train, variance_x_train)
-
+    variance_x_train = VarianceThreshold(threshold=variance_threshold).fit_transform(
+        min_max_scaler.transform(features_data))
+    variance_x_train = preprocessing.scale(variance_x_train)
+    find_best_k_for_reduced_features(ica_x_train, pca_x_train, rp_x_train, variance_x_train)
     clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_train)
 
 
@@ -107,14 +116,14 @@ def find_best_k_for_reduced_features(ica_x_train, pca_x_train, rp_x_train, varia
 
 
 def clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_train):
-    ica_kmeans_k = 5
-    ica_em_k = 8
-    pca_em_k = 4
-    pca_kmeans_k = 5
-    rp_em_k = 12
-    rp_kmeans_k = 5
-    variance_filter_em_k = 9
-    variance_filter_kmeans_k = 10
+    ica_kmeans_k = 6
+    ica_em_k = 5
+    pca_em_k = 5
+    pca_kmeans_k = 7
+    rp_em_k = 6
+    rp_kmeans_k = 7
+    variance_filter_em_k = 13
+    variance_filter_kmeans_k = 6
     simple_clustering("{}- ICA".format(plot_name), ica_x_train, ica_kmeans_k, ica_em_k,
                       base_experiment.identify_top_2_features(ica_x_train))
     simple_clustering("{}- PCA".format(plot_name), pca_x_train, pca_kmeans_k, pca_em_k,
@@ -128,5 +137,6 @@ def clustering_after_reduction(pca_x_train, ica_x_train, rp_x_train, variance_x_
 kmeans_best_k = 8
 em_best_k = 7
 
-simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
+# simple_clustering(plot_name, x_train, kmeans_best_k, em_best_k, top_2_features)
+# explore_dimensionality_reduction()
 dimensionality_reduction()
