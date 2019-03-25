@@ -68,9 +68,9 @@ def simple_clustering(plot_name, X, kmeans_k, em_k, top_2_features_given=None):
     clfr.fit(X)
     em_clusters = clfr.predict(X)
     base_experiment.describe_what_you_see(em_clusters, y_train, plot_name,
-                                          kmeans_k, "EM (k={})".format(em_k))
+                                          em_k, "EM (k={})".format(em_k))
     base_experiment.plot_points(plot_name, X, top_2_features_given, clfr.predict(X), clfr.means_,
-                                kmeans_k, "EM k={}".format(em_k))
+                                em_k, "EM k={}".format(em_k))
     kmeans_clusters = kmeans_clusters.reshape((1599, 1))
     em_clusters = em_clusters.reshape((1599, 1))
     concatenate = np.concatenate((kmeans_clusters, em_clusters), axis=1)

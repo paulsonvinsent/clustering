@@ -68,9 +68,9 @@ def simple_clustering(plot_name, X, kmeans_k, em_k, top_2_features_given=None):
     clfr = mixture.GaussianMixture(n_components=em_k, covariance_type='full')
     clfr.fit(X)
     base_experiment.describe_what_you_see(clfr.predict(X), y_train, plot_name,
-                                          kmeans_k, "EM (k={})".format(em_k))
+                                          em_k, "EM (k={})".format(em_k))
     base_experiment.plot_points(plot_name, X, top_2_features_given, clfr.predict(X), clfr.means_,
-                                kmeans_k, "EM k={}".format(em_k))
+                                em_k, "EM k={}".format(em_k))
 
 
 def explore_dimensionality_reduction():
