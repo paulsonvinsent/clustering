@@ -51,8 +51,6 @@ min_max_scaler.fit(features_data)
 
 def simple_clustering(plot_name, X, kmeans_k, em_k, top_2_features_given=None):
     if top_2_features_given is None:
-        top_2_features_given = top_2_features
-    else:
         top_2_features_given = base_experiment.identify_top_2_features(X)
 
     base_experiment.plot_score_em(range(2, 20), X, plot_name)
